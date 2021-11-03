@@ -1,2 +1,2 @@
 # OpenSceneGraphReserch
-Some practice for Osg
+Some practice for QtOsg
