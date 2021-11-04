@@ -25,6 +25,7 @@
 
 #include<QtCore>
 #include<QColor>
+#include <osg/ValueObject>
 
 
 
@@ -57,6 +58,21 @@ struct eggUnit{
     QColor layerColor2; //the layer2 color
     QColor layerColor3; //the layer3 color
     bool useTest2d;
+};
+class BasePrimtiveData
+{
+public:
+    osg::Vec3 center;
+    osg::Vec3 normal;
+};
+
+class PipeData:BasePrimtiveData
+{
+public:
+    float length;
+    float innerRadius;
+    float extRadius;
+
 };
 
 #endif // DATADEFINE_H

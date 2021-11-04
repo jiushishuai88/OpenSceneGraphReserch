@@ -19,6 +19,7 @@
 #define SHAPENODEGENERATOR_H
 #include<osg/MatrixTransform>
 #include<QtCore>
+#include "datadefine.h"
 
 
 class ShapeNodeGenerator
@@ -39,7 +40,7 @@ public:
      /**生成圆锥体**/
     osg::ref_ptr<osg::MatrixTransform> GetCone(const osg::Vec3& center,float radius,float height ,osg::Vec3 nTo);
     void GenerateSurface(osg::Geometry* geom,int* index1,int* index2,int col);
-    osg::ref_ptr<osg::MatrixTransform> GetPipe(float length,float innerR,float extR);
+    osg::ref_ptr<osg::MatrixTransform> GetPipe(PipeData*);
     osg::ref_ptr<osg::Vec3Array> GenerateCirclePoints( float z,float radius,int points);
 };
 

@@ -220,6 +220,10 @@ void QtOSGWidget::AddData(eggUnit data)
 
  void QtOSGWidget::TestFuc()
  {
-     osg::ref_ptr<osg::MatrixTransform> mt =ShapeNodeGenerator::GetInstance()->GetPipe(8,2,4);
+     PipeData* pdata = new PipeData();
+     pdata->length= 8;
+     pdata->innerRadius=2;
+     pdata->extRadius = 4;
+     osg::ref_ptr<osg::MatrixTransform> mt =ShapeNodeGenerator::GetInstance()->GetPipe(pdata);
      m_pRoot->addChild(mt);
  }

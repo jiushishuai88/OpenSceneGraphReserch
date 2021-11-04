@@ -261,14 +261,14 @@ osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetCircleGrid(const osg::
        geom->addPrimitiveSet( indices.get() );
    }
 
-   osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetPipe(float length,float innerR,float extR)
+   osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetPipe(PipeData* pData)
    {
-       const int points = 100*pow(extR,2);
+       const int points = 100*pow(pData->extRadius,2);
        osg::ref_ptr<osg::Vec2Array> vec2Arr = new osg::Vec2Array();
-       vec2Arr->push_back(osg::Vec2(length/2,extR));
-       vec2Arr->push_back(osg::Vec2(-length/2,extR));
-       vec2Arr->push_back(osg::Vec2(-length/2,innerR));
-       vec2Arr->push_back(osg::Vec2(length/2,innerR));
+       vec2Arr->push_back(osg::Vec2(pData->length/2,pData->extRadius));
+       vec2Arr->push_back(osg::Vec2(-pData->length/2,pData->extRadius));
+       vec2Arr->push_back(osg::Vec2(-pData->length/2,pData->innerRadius));
+       vec2Arr->push_back(osg::Vec2(pData->length/2,pData->innerRadius));
 
        int numElements = vec2Arr->getNumElements();
        int* indexArray = new int[numElements*points];
