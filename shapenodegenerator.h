@@ -27,21 +27,30 @@ class ShapeNodeGenerator
 private:
     ShapeNodeGenerator();
     static ShapeNodeGenerator* m_pSelf;
+    /** 对三维坐标数组进行转换 **/
+     void V3ArrayTransform(osg::Vec3Array* pArr,const osg::Matrixd& mat);
+     /** 生成圆形基点 默认基准点为（0,0,0）法线(0,0,1)**/
+     osg::ref_ptr<osg::Vec3Array> GenerateCirclePoints(float radius,int points,float arcFrom =0,float arc = 2*osg::PI);
+     /** 根据半径生成顶点数 **/
+     ulong ComputePointsByRadius(float r,float arc = 2*osg::PI);
 public:
     static ShapeNodeGenerator* GetInstance();
-    /**生成矩形网格**/
+    /** 生成矩形网格 **/
     osg::ref_ptr<osg::MatrixTransform> GetRectangleGrid(const osg::Vec3& upleft,float width,float height,
                                               osg::Vec3& nTo,int wDim,int hDim);
-    /**生成圆形网格**/
+    /** 生成圆形网格 **/
     osg::ref_ptr<osg::MatrixTransform> GetCircleGrid(const osg::Vec3& center,float radius,int rDim,int arcDim,
                                                   osg::Vec3& nTo);
-    /**生成圆柱体**/
+    /** 生成圆柱体 **/
     osg::ref_ptr<osg::MatrixTransform> GetCylinder(const osg::Vec3& center,float radius,float height ,osg::Vec3 nTo,bool useText2d=false);
-     /**生成圆锥体**/
+     /** 生成圆锥体 **/
     osg::ref_ptr<osg::MatrixTransform> GetCone(const osg::Vec3& center,float radius,float height ,osg::Vec3 nTo);
     void GenerateSurface(osg::Geometry* geom,int* index1,int* index2,int col);
     osg::ref_ptr<osg::MatrixTransform> GetPipe(PipeData*);
-    osg::ref_ptr<osg::Vec3Array> GenerateCirclePoints( float z,float radius,int points);
+    /** 将数组点首尾相连 **/
+    void LoopPoints( osg::ref_ptr<osg::Vec3Array>);
+    void GetOgivePipe(OgivePipeData* data);
+
 };
 
 #endif // SHAPENODEGENERATOR_H

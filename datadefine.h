@@ -66,13 +66,20 @@ public:
     osg::Vec3 normal;
 };
 
-class PipeData:BasePrimtiveData
+class PipeData:public BasePrimtiveData
 {
 public:
     float length;
     float innerRadius;
     float extRadius;
 
+};
+
+class OgivePipeData:public PipeData
+{
+public:
+    bool Inverse = false;
+    float arc;//0<arc<2π
 };
 
 #endif // DATADEFINE_H

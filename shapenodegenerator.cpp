@@ -263,7 +263,7 @@ osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetCircleGrid(const osg::
 
    osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetPipe(PipeData* pData)
    {
-       const int points = 100*pow(pData->extRadius,2);
+       ulong points = ComputePointsByRadius(pData->extRadius);
        osg::ref_ptr<osg::Vec2Array> vec2Arr = new osg::Vec2Array();
        vec2Arr->push_back(osg::Vec2(pData->length/2,pData->extRadius));
        vec2Arr->push_back(osg::Vec2(-pData->length/2,pData->extRadius));
@@ -280,7 +280,9 @@ osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetCircleGrid(const osg::
        for(int i =0;i<numElements;++i)
        {
            osg::Vec2f v2=(*vec2Arr)[i];
-           osg::ref_ptr<osg::Vec3Array> v3Points= GenerateCirclePoints(v2.x(),v2.y(),points);
+           osg::ref_ptr<osg::Vec3Array> v3Points= GenerateCirclePoints(v2.y(),points-1);
+           V3ArrayTransform(v3Points,osg::Matrix::translate(osg::Vec3(0,0,v2.x())));
+           LoopPoints(v3Points);
            v->insert(v->end(),v3Points->begin(),v3Points->end());
        }
        osg::ref_ptr<osg::Geometry> geom = new osg::Geometry();
@@ -309,17 +311,41 @@ osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetCircleGrid(const osg::
       return mt;
    }
 
-/** 生成圆形基点 默认基准点为（0,0，z）**/
-osg::ref_ptr<osg::Vec3Array> ShapeNodeGenerator::GenerateCirclePoints( float z,float radius,int points)
+void ShapeNodeGenerator::GetOgivePipe(OgivePipeData* pData)
 {
-  points-=1;
-  float angle = 2*osg::PI/points;
+   float arcRadius;
+   //计算圆弧半径
+   arcRadius=(pData->length/2)/sinf(pData->arc/2);
+   ulong points = ComputePointsByRadius(pData->extRadius,pData->arc);
+
+}
+
+osg::ref_ptr<osg::Vec3Array> ShapeNodeGenerator::GenerateCirclePoints(float radius,int points,float arcFrom ,float arc)
+{
+  float angle = arc/points;
   osg::ref_ptr<osg::Vec3Array> v = new osg::Vec3Array();
   for(int i = 0;i<points;++i)
   {
-      v->push_back(osg::Vec3(radius*cosf(i*angle),radius*sinf(i*angle),z));
+      v->push_back(osg::Vec3(radius*cosf(arcFrom+i*angle),radius*sinf(arcFrom+i*angle),0));
   }
-  //加上起始点进行首尾连接
-  v->push_back(osg::Vec3(radius,0,z));
   return v;
 }
+
+void ShapeNodeGenerator::LoopPoints( osg::ref_ptr<osg::Vec3Array> pArr)
+ {
+    pArr->push_back(pArr->front());
+ }
+
+
+ ulong ShapeNodeGenerator::ComputePointsByRadius(float r,float arc)
+ {
+     return ceil(100*2*arc*r);
+ }
+
+ void ShapeNodeGenerator::V3ArrayTransform(osg::Vec3Array* pArr,const osg::Matrixd& mat)
+ {
+     for(uint i= 0;i < pArr->getNumElements();++i)
+     {
+         (*pArr)[i] = mat.preMult((*pArr)[i]);
+     }
+ }

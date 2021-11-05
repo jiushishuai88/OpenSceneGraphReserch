@@ -226,4 +226,5 @@ void QtOSGWidget::AddData(eggUnit data)
      pdata->extRadius = 4;
      osg::ref_ptr<osg::MatrixTransform> mt =ShapeNodeGenerator::GetInstance()->GetPipe(pdata);
      m_pRoot->addChild(mt);
+     delete pdata;
  }
