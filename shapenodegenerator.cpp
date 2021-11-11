@@ -24,6 +24,7 @@
 #include <osg/Material>
 #include <osgDB/ReadFile>
 #include <osgUtil/SmoothingVisitor>
+#include <osg/CopyOp>
 
  ShapeNodeGenerator* ShapeNodeGenerator::m_pSelf =nullptr;
 
@@ -264,13 +265,13 @@ osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetCircleGrid(const osg::
    osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetPipe(PipeData* pData)
    {
        ulong points = ComputePointsByRadius(pData->extRadius);
-       osg::ref_ptr<osg::Vec2Array> vec2Arr = new osg::Vec2Array();
-       vec2Arr->push_back(osg::Vec2(pData->length/2,pData->extRadius));
-       vec2Arr->push_back(osg::Vec2(-pData->length/2,pData->extRadius));
-       vec2Arr->push_back(osg::Vec2(-pData->length/2,pData->innerRadius));
-       vec2Arr->push_back(osg::Vec2(pData->length/2,pData->innerRadius));
+       osg::ref_ptr<osg::Vec3Array> vec3Arr = new osg::Vec3Array();
+       vec3Arr->push_back(osg::Vec3(pData->extRadius,0,pData->length/2));
+       vec3Arr->push_back(osg::Vec3(pData->extRadius,0,-pData->length/2));
+       vec3Arr->push_back(osg::Vec3(pData->innerRadius,0,-pData->length/2));
+       vec3Arr->push_back(osg::Vec3(pData->innerRadius,0,pData->length/2));
 
-       int numElements = vec2Arr->getNumElements();
+       int numElements = vec3Arr->getNumElements();
        int* indexArray = new int[numElements*points];
        for(int i = 0;i<numElements*points;++i)
        {
@@ -279,9 +280,9 @@ osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetCircleGrid(const osg::
        osg::ref_ptr<osg::Vec3Array> v= new osg::Vec3Array;
        for(int i =0;i<numElements;++i)
        {
-           osg::Vec2f v2=(*vec2Arr)[i];
-           osg::ref_ptr<osg::Vec3Array> v3Points= GenerateCirclePoints(v2.y(),points-1);
-           V3ArrayTransform(v3Points,osg::Matrix::translate(osg::Vec3(0,0,v2.x())));
+           osg::Vec3f v3=(*vec3Arr)[i];
+           osg::ref_ptr<osg::Vec3Array> v3Points= GenerateCirclePoints(v3.x(),points-1);
+           V3ArrayTransform(v3Points,osg::Matrix::translate(osg::Vec3(0,0,v3.z())));
            LoopPoints(v3Points);
            v->insert(v->end(),v3Points->begin(),v3Points->end());
        }
@@ -304,20 +305,90 @@ osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetCircleGrid(const osg::
         geode->addDrawable(geom.get());
 
         osg::ref_ptr<osg::MatrixTransform> mt = new osg::MatrixTransform();
-        //mt->setMatrix(osg::Matrix::rotate(nFrom,nTo)*osg::Matrix::translate(center));
+        mt->setMatrix(osg::Matrix::rotate(pData->baseNormal,pData->normal)*osg::Matrix::translate(pData->center));
         mt->addChild(geode);
         delete []indexArray;
 
       return mt;
    }
 
-void ShapeNodeGenerator::GetOgivePipe(OgivePipeData* pData)
+osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetOgivePipe(OgivePipeData* pData)
 {
    float arcRadius;
    //计算圆弧半径
    arcRadius=(pData->length/2)/sinf(pData->arc/2);
-   ulong points = ComputePointsByRadius(pData->extRadius,pData->arc);
+   ulong arcPoints = ComputePointsByRadius(arcRadius,pData->arc);
+   osg::ref_ptr<osg::Vec3Array> arcArray = GenerateCirclePoints(arcRadius,arcPoints,-(pData->arc/2),pData->arc);
+   osg::Vec3 Nfrom(0,0,1);
+   osg::Vec3 NTo(0,1,0);
 
+   osg::ref_ptr<osg::Vec3Array> arcExtArray = new osg::Vec3Array(*arcArray,osg::CopyOp::DEEP_COPY_ALL);
+   osg::Vec3 extCenter(pData->extRadius-arcRadius*cosf(pData->arc/2),0,0);
+   V3ArrayTransform(arcExtArray,osg::Matrix::translate(extCenter)*osg::Matrix::rotate(Nfrom,NTo));
+
+   osg::Vec3 innerCenter(pData->innerRadius-arcRadius*cosf(pData->arc/2),0,0);
+   osg::ref_ptr<osg::Vec3Array> arcInnerArray = new osg::Vec3Array(*arcArray,osg::CopyOp::DEEP_COPY_ALL);
+   V3ArrayTransform(arcInnerArray,osg::Matrix::translate(innerCenter)*osg::Matrix::rotate(Nfrom,NTo));
+
+   osg::ref_ptr<osg::Vec3Array> arcCombineArray = new osg::Vec3Array();
+   arcCombineArray->insert(arcCombineArray->end(),arcExtArray->begin(),arcExtArray->end());
+   //翻转innerarray
+   int innerNumElements = arcInnerArray->getNumElements();
+   for(int i =0;i<innerNumElements;++i)
+   {
+       arcCombineArray->push_back((*arcInnerArray)[innerNumElements-i-1]);
+   }
+
+   int numElements = arcCombineArray->getNumElements();
+
+   //获取映射到x轴最大半径
+   float maxR =0;
+   for(int i=0;i<numElements;++i)
+   {
+       float x = (*arcCombineArray)[i].x();
+       maxR = (maxR<x)? x:maxR;
+   }
+   ulong circlePoints = ComputePointsByRadius(maxR);
+
+   int* indexArray = new int[numElements*circlePoints];
+   for(int i = 0;i<numElements*circlePoints;++i)
+   {
+      indexArray[i]=i;
+   }
+   osg::ref_ptr<osg::Vec3Array> v= new osg::Vec3Array;
+   for(int i =0;i<numElements;++i)
+   {
+       osg::Vec3f v3=(*arcCombineArray)[i];
+       osg::ref_ptr<osg::Vec3Array> v3Points= GenerateCirclePoints(v3.x(),circlePoints-1);
+       V3ArrayTransform(v3Points,osg::Matrix::translate(osg::Vec3(0,0,v3.z())));
+       LoopPoints(v3Points);
+       v->insert(v->end(),v3Points->begin(),v3Points->end());
+   }
+
+   osg::ref_ptr<osg::Geometry> geom = new osg::Geometry();
+   geom->setVertexArray(v.get());
+   for(int i= 0;i<numElements;++i)
+   {
+        GenerateSurface(geom,indexArray+i*circlePoints,indexArray+((i+1)%numElements)*circlePoints,circlePoints);
+   }
+
+
+    osgUtil::SmoothingVisitor::smooth( *geom );
+
+    osg::ref_ptr<osg::Vec4Array> colorArray=new osg::Vec4Array();
+    colorArray->push_back(osg::Vec4(1,1,0,1));
+    geom->setColorArray(colorArray.get());
+    geom->setColorBinding(osg::Geometry::BIND_OVERALL);
+
+    osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+    geode->addDrawable(geom.get());
+
+    osg::ref_ptr<osg::MatrixTransform> mt = new osg::MatrixTransform();
+    mt->setMatrix(osg::Matrix::rotate(pData->baseNormal,pData->normal)*osg::Matrix::translate(pData->center));
+    mt->addChild(geode);
+    delete []indexArray;
+
+  return mt;
 }
 
 osg::ref_ptr<osg::Vec3Array> ShapeNodeGenerator::GenerateCirclePoints(float radius,int points,float arcFrom ,float arc)
@@ -339,7 +410,7 @@ void ShapeNodeGenerator::LoopPoints( osg::ref_ptr<osg::Vec3Array> pArr)
 
  ulong ShapeNodeGenerator::ComputePointsByRadius(float r,float arc)
  {
-     return ceil(100*2*arc*r);
+     return ceil(10*2*arc*r);
  }
 
  void ShapeNodeGenerator::V3ArrayTransform(osg::Vec3Array* pArr,const osg::Matrixd& mat)

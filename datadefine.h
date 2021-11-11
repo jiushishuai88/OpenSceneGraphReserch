@@ -59,16 +59,24 @@ struct eggUnit{
     QColor layerColor3; //the layer3 color
     bool useTest2d;
 };
+
+
 class BasePrimtiveData
 {
 public:
+    BasePrimtiveData();
+    virtual ~BasePrimtiveData();
+    const osg::Vec3 baseNormal;
     osg::Vec3 center;
     osg::Vec3 normal;
 };
 
+
 class PipeData:public BasePrimtiveData
 {
 public:
+    PipeData();
+    virtual ~PipeData();
     float length;
     float innerRadius;
     float extRadius;
@@ -78,6 +86,8 @@ public:
 class OgivePipeData:public PipeData
 {
 public:
+    OgivePipeData();
+    virtual ~OgivePipeData();
     bool Inverse = false;
     float arc;//0<arc<2π
 };

@@ -49,7 +49,7 @@ public:
     osg::ref_ptr<osg::MatrixTransform> GetPipe(PipeData*);
     /** 将数组点首尾相连 **/
     void LoopPoints( osg::ref_ptr<osg::Vec3Array>);
-    void GetOgivePipe(OgivePipeData* data);
+    osg::ref_ptr<osg::MatrixTransform> GetOgivePipe(OgivePipeData* data);
 
 };
 

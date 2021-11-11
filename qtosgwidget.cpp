@@ -220,11 +220,34 @@ void QtOSGWidget::AddData(eggUnit data)
 
  void QtOSGWidget::TestFuc()
  {
-     PipeData* pdata = new PipeData();
-     pdata->length= 8;
-     pdata->innerRadius=2;
-     pdata->extRadius = 4;
-     osg::ref_ptr<osg::MatrixTransform> mt =ShapeNodeGenerator::GetInstance()->GetPipe(pdata);
-     m_pRoot->addChild(mt);
-     delete pdata;
+     PipeData* pPipedata0 = new PipeData();
+     pPipedata0->length= 8;
+     pPipedata0->innerRadius=1;
+     pPipedata0->extRadius = 2;
+     pPipedata0->normal.set(-1,0,0);
+     pPipedata0->center.set(-6,0,0);
+     osg::ref_ptr<osg::MatrixTransform> mtPipe0 =ShapeNodeGenerator::GetInstance()->GetPipe(pPipedata0);
+     m_pRoot->addChild(mtPipe0);
+     delete pPipedata0;
+
+     PipeData* pPipedata1 = new PipeData();
+     pPipedata1->length= 8;
+     pPipedata1->innerRadius=1;
+     pPipedata1->extRadius = 2;
+     pPipedata1->normal.set(-1,0,0);
+     pPipedata1->center.set(6,0,0);
+     osg::ref_ptr<osg::MatrixTransform> mtPipe1 =ShapeNodeGenerator::GetInstance()->GetPipe(pPipedata1);
+     m_pRoot->addChild(mtPipe1);
+     delete pPipedata1;
+
+     OgivePipeData* pOgdata = new OgivePipeData();
+     pOgdata->length= 4;
+     pOgdata->innerRadius=1;
+     pOgdata->extRadius = 2;
+     pOgdata->arc = osg::PI_2;
+     pOgdata->normal.set(-1,0,0);
+     osg::ref_ptr<osg::MatrixTransform> mtOg =ShapeNodeGenerator::GetInstance()->GetOgivePipe(pOgdata);
+     m_pRoot->addChild(mtOg);
+     delete pOgdata;
+
  }
