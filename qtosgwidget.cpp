@@ -35,6 +35,7 @@
 #include <osgDB/ReadFile>
 #include "shapenodegenerator.h"
 #include "osgUtil/SmoothingVisitor"
+#include "texture2dmanager.h"
 
 QtOSGWidget::QtOSGWidget(QWidget* parent):
     QOpenGLWidget(parent),
@@ -220,33 +221,37 @@ void QtOSGWidget::AddData(eggUnit data)
 
  void QtOSGWidget::TestFuc()
  {
-     PipeData* pPipedata0 = new PipeData();
-     pPipedata0->length= 8;
-     pPipedata0->innerRadius=1;
-     pPipedata0->extRadius = 2;
-     pPipedata0->normal.set(-1,0,0);
-     pPipedata0->center.set(-6,0,0);
-     osg::ref_ptr<osg::MatrixTransform> mtPipe0 =ShapeNodeGenerator::GetInstance()->GetPipe(pPipedata0);
-     m_pRoot->addChild(mtPipe0);
-     delete pPipedata0;
+     OgivePipeData* pOGdata0 = new OgivePipeData(BasePrimtiveData::PriMtiveType_OGIVE_PIPE);
+     pOGdata0->length= 8.1;
+     pOGdata0->innerRadius=1;
+     pOGdata0->extRadius = 2;
+     pOGdata0->normal.set(-1,0,0);
+     pOGdata0->center.set(-6,0,0);
+     pOGdata0->arc = 1;
+     pOGdata0->pT2D = Texture2DManager::GetInstance()->GetT2DByID(Texture2DManager::T2DID_TEST);
+     osg::ref_ptr<osg::MatrixTransform> mtOg0 =ShapeNodeGenerator::GetInstance()->GetRoatationOfAxes(pOGdata0);
+     m_pRoot->addChild(mtOg0);
+     delete pOGdata0;
 
-     PipeData* pPipedata1 = new PipeData();
-     pPipedata1->length= 8;
+
+     PipeData* pPipedata1 = new PipeData(BasePrimtiveData::PriMtiveType_PIPE);
+     pPipedata1->length= 8.1;
      pPipedata1->innerRadius=1;
      pPipedata1->extRadius = 2;
      pPipedata1->normal.set(-1,0,0);
      pPipedata1->center.set(6,0,0);
-     osg::ref_ptr<osg::MatrixTransform> mtPipe1 =ShapeNodeGenerator::GetInstance()->GetPipe(pPipedata1);
+     osg::ref_ptr<osg::MatrixTransform> mtPipe1 =ShapeNodeGenerator::GetInstance()->GetRoatationOfAxes(pPipedata1);
      m_pRoot->addChild(mtPipe1);
      delete pPipedata1;
 
-     OgivePipeData* pOgdata = new OgivePipeData();
+     OgivePipeData* pOgdata = new OgivePipeData(BasePrimtiveData::PriMtiveType_OGIVE_PIPE);
      pOgdata->length= 4;
      pOgdata->innerRadius=1;
      pOgdata->extRadius = 2;
-     pOgdata->arc = osg::PI_2;
+     pOgdata->arc = -1;
      pOgdata->normal.set(-1,0,0);
-     osg::ref_ptr<osg::MatrixTransform> mtOg =ShapeNodeGenerator::GetInstance()->GetOgivePipe(pOgdata);
+     pOgdata->pT2D = Texture2DManager::GetInstance()->GetT2DByID(Texture2DManager::T2DID_TEST);
+     osg::ref_ptr<osg::MatrixTransform> mtOg =ShapeNodeGenerator::GetInstance()->GetRoatationOfAxes(pOgdata);
      m_pRoot->addChild(mtOg);
      delete pOgdata;
 

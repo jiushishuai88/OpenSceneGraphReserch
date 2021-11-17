@@ -262,7 +262,7 @@ osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetCircleGrid(const osg::
        geom->addPrimitiveSet( indices.get() );
    }
 
-   osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetPipe(PipeData* pData)
+  osg::ref_ptr<osg::Geometry> ShapeNodeGenerator::GeneratePipe(PipeData* pData)
    {
        ulong points = ComputePointsByRadius(pData->extRadius);
        osg::ref_ptr<osg::Vec3Array> vec3Arr = new osg::Vec3Array();
@@ -292,8 +292,10 @@ osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetCircleGrid(const osg::
        {
             GenerateSurface(geom,indexArray+i*points,indexArray+((i+1)%numElements)*points,points);
        }
+       delete []indexArray;
+       return geom;
 
-
+       /*
         osgUtil::SmoothingVisitor::smooth( *geom );
 
         osg::ref_ptr<osg::Vec4Array> colorArray=new osg::Vec4Array();
@@ -307,12 +309,13 @@ osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetCircleGrid(const osg::
         osg::ref_ptr<osg::MatrixTransform> mt = new osg::MatrixTransform();
         mt->setMatrix(osg::Matrix::rotate(pData->baseNormal,pData->normal)*osg::Matrix::translate(pData->center));
         mt->addChild(geode);
-        delete []indexArray;
+
 
       return mt;
+      */
    }
 
-osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetOgivePipe(OgivePipeData* pData)
+osg::ref_ptr<osg::Geometry> ShapeNodeGenerator::GenerateOgivePipe(OgivePipeData* pData)
 {
    float arcRadius;
    //计算圆弧半径
@@ -356,6 +359,7 @@ osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetOgivePipe(OgivePipeDat
       indexArray[i]=i;
    }
    osg::ref_ptr<osg::Vec3Array> v= new osg::Vec3Array;
+   osg::ref_ptr<osg::Vec2Array> texcoords= new osg::Vec2Array;
    for(int i =0;i<numElements;++i)
    {
        osg::Vec3f v3=(*arcCombineArray)[i];
@@ -364,15 +368,28 @@ osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetOgivePipe(OgivePipeDat
        LoopPoints(v3Points);
        v->insert(v->end(),v3Points->begin(),v3Points->end());
    }
+   //纹理贴图只贴表面
+   int extNumElements = arcExtArray->getNumElements();
+     for(int i =0;i<numElements;++i)
+     {
+         for(int j=0;j<circlePoints;++j)
+         {
+             texcoords->push_back(osg::Vec2f(float(j)/float((circlePoints-1)),float(extNumElements-1-i)/float((extNumElements-1))));
+         }
+     }
 
    osg::ref_ptr<osg::Geometry> geom = new osg::Geometry();
    geom->setVertexArray(v.get());
+   //arg0:the index of text2d
+   geom->setTexCoordArray(0,texcoords);
    for(int i= 0;i<numElements;++i)
    {
         GenerateSurface(geom,indexArray+i*circlePoints,indexArray+((i+1)%numElements)*circlePoints,circlePoints);
    }
+   delete []indexArray;
+   return geom;
 
-
+   /*
     osgUtil::SmoothingVisitor::smooth( *geom );
 
     osg::ref_ptr<osg::Vec4Array> colorArray=new osg::Vec4Array();
@@ -386,9 +403,10 @@ osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetOgivePipe(OgivePipeDat
     osg::ref_ptr<osg::MatrixTransform> mt = new osg::MatrixTransform();
     mt->setMatrix(osg::Matrix::rotate(pData->baseNormal,pData->normal)*osg::Matrix::translate(pData->center));
     mt->addChild(geode);
-    delete []indexArray;
+
 
   return mt;
+  */
 }
 
 osg::ref_ptr<osg::Vec3Array> ShapeNodeGenerator::GenerateCirclePoints(float radius,int points,float arcFrom ,float arc)
@@ -397,6 +415,7 @@ osg::ref_ptr<osg::Vec3Array> ShapeNodeGenerator::GenerateCirclePoints(float radi
   osg::ref_ptr<osg::Vec3Array> v = new osg::Vec3Array();
   for(int i = 0;i<points;++i)
   {
+      osg::Vec3 v3(radius*cosf(arcFrom+i*angle),radius*sinf(arcFrom+i*angle),0);
       v->push_back(osg::Vec3(radius*cosf(arcFrom+i*angle),radius*sinf(arcFrom+i*angle),0));
   }
   return v;
@@ -419,4 +438,40 @@ void ShapeNodeGenerator::LoopPoints( osg::ref_ptr<osg::Vec3Array> pArr)
      {
          (*pArr)[i] = mat.preMult((*pArr)[i]);
      }
+ }
+
+ osg::ref_ptr<osg::Geometry> ShapeNodeGenerator::GenerateGeometry(BasePrimtiveData* pData)
+ {
+     switch (pData->type)
+     {
+     case BasePrimtiveData::PriMtiveType_PIPE :
+         return GeneratePipe(dynamic_cast<PipeData*>( pData));
+         break;
+       case BasePrimtiveData::PriMtiveType_OGIVE_PIPE:
+         return GenerateOgivePipe(dynamic_cast<OgivePipeData*>(pData));
+         break;
+     }
+     return nullptr;
+ }
+
+ osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetRoatationOfAxes(BasePrimtiveData* pData)
+ {
+     osg::ref_ptr<osg::Geometry> geom = GenerateGeometry(pData);
+     osgUtil::SmoothingVisitor::smooth( *geom );
+
+     osg::ref_ptr<osg::Vec4Array> colorArray=new osg::Vec4Array();
+     colorArray->push_back(pData->color);
+     geom->setColorArray(colorArray.get());
+     geom->setColorBinding(osg::Geometry::BIND_OVERALL);
+     osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+     geode->addDrawable(geom.get());
+     osg::StateSet* stateset = geode->getOrCreateStateSet();
+     if(pData->pT2D!=nullptr)
+     {
+         stateset->setTextureAttributeAndModes(0, pData->pT2D, osg::StateAttribute::ON);
+     }
+     osg::ref_ptr<osg::MatrixTransform> mt = new osg::MatrixTransform();
+     mt->setMatrix(osg::Matrix::rotate(pData->baseNormal,pData->normal)*osg::Matrix::translate(pData->center));
+     mt->addChild(geode);
+     return mt;
  }

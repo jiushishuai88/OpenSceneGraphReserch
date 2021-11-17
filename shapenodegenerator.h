@@ -33,6 +33,13 @@ private:
      osg::ref_ptr<osg::Vec3Array> GenerateCirclePoints(float radius,int points,float arcFrom =0,float arc = 2*osg::PI);
      /** 根据半径生成顶点数 **/
      ulong ComputePointsByRadius(float r,float arc = 2*osg::PI);
+     /** 将数组点首尾相连 **/
+     void LoopPoints( osg::ref_ptr<osg::Vec3Array>);
+     osg::ref_ptr<osg::Geometry> GenerateGeometry(BasePrimtiveData*);
+     osg::ref_ptr<osg::Geometry> GeneratePipe(PipeData*);
+     osg::ref_ptr<osg::Geometry> GenerateOgivePipe(OgivePipeData* data);
+     /**根据顶点和脚标构建几何图形 **/
+     void GenerateSurface(osg::Geometry* geom,int* index1,int* index2,int col);
 public:
     static ShapeNodeGenerator* GetInstance();
     /** 生成矩形网格 **/
@@ -45,12 +52,8 @@ public:
     osg::ref_ptr<osg::MatrixTransform> GetCylinder(const osg::Vec3& center,float radius,float height ,osg::Vec3 nTo,bool useText2d=false);
      /** 生成圆锥体 **/
     osg::ref_ptr<osg::MatrixTransform> GetCone(const osg::Vec3& center,float radius,float height ,osg::Vec3 nTo);
-    void GenerateSurface(osg::Geometry* geom,int* index1,int* index2,int col);
-    osg::ref_ptr<osg::MatrixTransform> GetPipe(PipeData*);
-    /** 将数组点首尾相连 **/
-    void LoopPoints( osg::ref_ptr<osg::Vec3Array>);
-    osg::ref_ptr<osg::MatrixTransform> GetOgivePipe(OgivePipeData* data);
-
+    /** 获取轴旋转图形 **/
+    osg::ref_ptr<osg::MatrixTransform> GetRoatationOfAxes(BasePrimtiveData*);
 };
 
 #endif // SHAPENODEGENERATOR_H

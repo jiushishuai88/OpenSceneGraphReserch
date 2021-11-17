@@ -26,6 +26,8 @@
 #include<QtCore>
 #include<QColor>
 #include <osg/ValueObject>
+#include <osg/Vec4>
+#include <osg/Texture2D>
 
 
 
@@ -64,31 +66,38 @@ struct eggUnit{
 class BasePrimtiveData
 {
 public:
-    BasePrimtiveData();
+    enum PriMtiveType
+    {
+        PriMtiveType_PIPE,
+        PriMtiveType_OGIVE_PIPE
+    };
+public:
+    BasePrimtiveData(PriMtiveType);
     virtual ~BasePrimtiveData();
     const osg::Vec3 baseNormal;
     osg::Vec3 center;
     osg::Vec3 normal;
+    osg::Vec4 color;
+    PriMtiveType type;
+    osg::ref_ptr<osg::Texture2D> pT2D = nullptr;
 };
 
 
 class PipeData:public BasePrimtiveData
 {
 public:
-    PipeData();
+    PipeData(PriMtiveType);
     virtual ~PipeData();
     float length;
     float innerRadius;
     float extRadius;
-
 };
 
 class OgivePipeData:public PipeData
 {
 public:
-    OgivePipeData();
+    OgivePipeData(PriMtiveType);
     virtual ~OgivePipeData();
-    bool Inverse = false;
     float arc;//0<arc<2π
 };
 

@@ -13,13 +13,15 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     qtosgwidget.cpp \
-    shapenodegenerator.cpp
+    shapenodegenerator.cpp \
+    texture2dmanager.cpp
 
 HEADERS += \
     datadefine.h \
     mainwindow.h \
     qtosgwidget.h \
-    shapenodegenerator.h
+    shapenodegenerator.h \
+    texture2dmanager.h
 
 FORMS += \
     mainwindow.ui
