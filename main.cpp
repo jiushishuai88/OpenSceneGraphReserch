@@ -15,7 +15,18 @@ int main(int argc, char *argv[])
     MainWindow w;
     QtOSGWidget* osgWD = new QtOSGWidget(&w);
     //----------------------------------------------------------------------------------------------
-    osgWD->TestFuc();
+    eggData data;
+    data.length= 4;
+    data.innerRadiusLeft = 0;
+    data.innerRadiusRight = 1;
+    data.arcInner = osg::PI_2;
+    data.extRadiusLeft = 0;
+    data.extRadiusRight = 2;
+    data.arcExt = osg::PI_2;
+    data.normal = {-1,0,0};
+    data.textureID = Texture2DManager::T2DID_TEST;
+    data.color = {1,1,1,1};
+    osgWD->AddData(data);
     //------------------------------------------------------------------------------------------------------
     w.setCentralWidget(osgWD);
     w.show();

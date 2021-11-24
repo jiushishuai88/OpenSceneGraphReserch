@@ -24,6 +24,7 @@
 #include <osgGA/TrackballManipulator>
 #include <osg/MatrixTransform>
 #include "datadefine.h"
+#include "ogive.h"
 
 /** osg widget类，3d显示接口 **/
 class QtOSGWidget:public QOpenGLWidget
@@ -42,9 +43,9 @@ public:
     /** 绘制圆柱 **/
     void DrawCylinder(const osg::Vec3& center,float radius, float height,osg::Vec3 nTo);
     /** 设置场景显示标准数据 **/
-    void SetData(QVector<struct eggUnit> data);
+    void SetData(QVector<struct eggData> data);
     /** 添加场景物体标准数据 **/
-    void AddData(eggUnit data);
+    void AddData(eggData data);
     void TestFuc();
 protected:
     virtual void initializeGL() override;
@@ -59,14 +60,14 @@ private:
     void SetCamera();
     void SetManipulator();
     void SetViewer();
-    void Draw(eggUnit data);
+    void Draw(const eggData& data);
     osg::ref_ptr<osgViewer::GraphicsWindow> m_pGraphicsWindow;
     osg::ref_ptr<osgViewer::Viewer> m_pViewer;
     qreal m_scale;
     osg::ref_ptr<osg::Group> m_pRoot;
     osg::ref_ptr<osg::Camera> m_pCamera;
     osg::ref_ptr<osgGA::TrackballManipulator> m_pManipulator;
-    QVector<struct eggUnit> m_veggUnit;
+    QVector<struct eggData> m_veggUnit;
 };
 
 #endif // QTOSGWIDGET_H

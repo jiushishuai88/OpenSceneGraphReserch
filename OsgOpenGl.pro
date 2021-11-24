@@ -9,9 +9,9 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    datadefine.cpp \
     main.cpp \
     mainwindow.cpp \
+    ogive.cpp \
     qtosgwidget.cpp \
     shapenodegenerator.cpp \
     texture2dmanager.cpp
@@ -19,6 +19,7 @@ SOURCES += \
 HEADERS += \
     datadefine.h \
     mainwindow.h \
+    ogive.h \
     qtosgwidget.h \
     shapenodegenerator.h \
     texture2dmanager.h

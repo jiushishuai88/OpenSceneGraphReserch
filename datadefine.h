@@ -28,7 +28,7 @@
 #include <osg/ValueObject>
 #include <osg/Vec4>
 #include <osg/Texture2D>
-
+#include "texture2dmanager.h"
 
 
 struct eggUnit{
@@ -62,43 +62,20 @@ struct eggUnit{
     bool useTest2d;
 };
 
-
-class BasePrimtiveData
+struct eggData
 {
-public:
-    enum PriMtiveType
-    {
-        PriMtiveType_PIPE,
-        PriMtiveType_OGIVE_PIPE
-    };
-public:
-    BasePrimtiveData(PriMtiveType);
-    virtual ~BasePrimtiveData();
-    const osg::Vec3 baseNormal;
-    osg::Vec3 center;
-    osg::Vec3 normal;
-    osg::Vec4 color;
-    PriMtiveType type;
-    osg::ref_ptr<osg::Texture2D> pT2D = nullptr;
-};
+    float length = {1};
+    float innerRadiusLeft = {1};
+    float innerRadiusRight = {1};
+    float arcInner = 0.01;
 
-
-class PipeData:public BasePrimtiveData
-{
-public:
-    PipeData(PriMtiveType);
-    virtual ~PipeData();
-    float length;
-    float innerRadius;
-    float extRadius;
-};
-
-class OgivePipeData:public PipeData
-{
-public:
-    OgivePipeData(PriMtiveType);
-    virtual ~OgivePipeData();
-    float arc;//0<arc<2π
+    float extRadiusLeft = {0.5};
+    float extRadiusRight = {0.5};
+    float arcExt = 0.01;
+    osg::Vec3 center = {0,0,0};
+    osg::Vec3 normal = {0,0,1};
+    osg::Vec4 color = {1,1,1,1};
+    Texture2DManager::T2DID textureID = Texture2DManager::T2DID_NONE;
 };
 
 #endif // DATADEFINE_H

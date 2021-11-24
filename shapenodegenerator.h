@@ -19,7 +19,7 @@
 #define SHAPENODEGENERATOR_H
 #include<osg/MatrixTransform>
 #include<QtCore>
-#include "datadefine.h"
+class Ogive;
 
 
 class ShapeNodeGenerator
@@ -35,11 +35,10 @@ private:
      ulong ComputePointsByRadius(float r,float arc = 2*osg::PI);
      /** 将数组点首尾相连 **/
      void LoopPoints( osg::ref_ptr<osg::Vec3Array>);
-     osg::ref_ptr<osg::Geometry> GenerateGeometry(BasePrimtiveData*);
-     osg::ref_ptr<osg::Geometry> GeneratePipe(PipeData*);
-     osg::ref_ptr<osg::Geometry> GenerateOgivePipe(OgivePipeData* data);
-     /**根据顶点和脚标构建几何图形 **/
+     osg::ref_ptr<osg::Geometry> GenerateOgive(Ogive* data);
+     /** 根据顶点和脚标构建几何图形 **/
      void GenerateSurface(osg::Geometry* geom,int* index1,int* index2,int col);
+
 public:
     static ShapeNodeGenerator* GetInstance();
     /** 生成矩形网格 **/
@@ -53,7 +52,8 @@ public:
      /** 生成圆锥体 **/
     osg::ref_ptr<osg::MatrixTransform> GetCone(const osg::Vec3& center,float radius,float height ,osg::Vec3 nTo);
     /** 获取轴旋转图形 **/
-    osg::ref_ptr<osg::MatrixTransform> GetRoatationOfAxes(BasePrimtiveData*);
+    osg::ref_ptr<osg::MatrixTransform> GetRoatationOfAxes(Ogive*);
+
 };
 
 #endif // SHAPENODEGENERATOR_H

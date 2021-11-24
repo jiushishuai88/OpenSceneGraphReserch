@@ -186,7 +186,7 @@ void QtOSGWidget::DrawCircleGrid(const osg::Vec3& center,float radius,int rDim,i
     m_pRoot->addChild(mt);
 }
 
-void QtOSGWidget::SetData(QVector<struct eggUnit> data)
+void QtOSGWidget::SetData(QVector<struct eggData> data)
 {
     m_veggUnit = data;
     for(int i=0;i<m_veggUnit.size();++i)
@@ -195,64 +195,31 @@ void QtOSGWidget::SetData(QVector<struct eggUnit> data)
     }
 }
 
-void QtOSGWidget::AddData(eggUnit data)
+void QtOSGWidget::AddData(eggData data)
 {
     m_veggUnit.append(data);
     Draw(data);
 }
 
- void QtOSGWidget::Draw(eggUnit data)
+ void QtOSGWidget::Draw(const eggData &data)
  {
-     if(data.shape.compare(BALL) == 0)
-     {
-
-     }
-     else if(data.shape.compare(CYLINDER)==0)
-     {
-         osg::ref_ptr<osg::MatrixTransform> mt = ShapeNodeGenerator::GetInstance()->GetCylinder(osg::Vec3(data.x1,data.y1,0),data.r1,data.length,osg::Vec3(-1,0,0),data.useTest2d);
-         m_pRoot->addChild(mt);
-     }
-     else if(data.shape.compare(CONE)==0)
-     {
-         osg::ref_ptr<osg::MatrixTransform> mt =ShapeNodeGenerator::GetInstance()->GetCone(osg::Vec3(data.x1,data.y1,0),data.r1,data.length,osg::Vec3(-1,0,0));
-         m_pRoot->addChild(mt);
-     }
+     Ogive ogive = {data};
+     m_pRoot->addChild(ogive.GetMt());
  }
 
  void QtOSGWidget::TestFuc()
  {
-     OgivePipeData* pOGdata0 = new OgivePipeData(BasePrimtiveData::PriMtiveType_OGIVE_PIPE);
-     pOGdata0->length= 8.1;
-     pOGdata0->innerRadius=1;
-     pOGdata0->extRadius = 2;
-     pOGdata0->normal.set(-1,0,0);
-     pOGdata0->center.set(-6,0,0);
-     pOGdata0->arc = 1;
-     pOGdata0->pT2D = Texture2DManager::GetInstance()->GetT2DByID(Texture2DManager::T2DID_TEST);
-     osg::ref_ptr<osg::MatrixTransform> mtOg0 =ShapeNodeGenerator::GetInstance()->GetRoatationOfAxes(pOGdata0);
-     m_pRoot->addChild(mtOg0);
-     delete pOGdata0;
-
-
-     PipeData* pPipedata1 = new PipeData(BasePrimtiveData::PriMtiveType_PIPE);
-     pPipedata1->length= 8.1;
-     pPipedata1->innerRadius=1;
-     pPipedata1->extRadius = 2;
-     pPipedata1->normal.set(-1,0,0);
-     pPipedata1->center.set(6,0,0);
-     osg::ref_ptr<osg::MatrixTransform> mtPipe1 =ShapeNodeGenerator::GetInstance()->GetRoatationOfAxes(pPipedata1);
-     m_pRoot->addChild(mtPipe1);
-     delete pPipedata1;
-
-     OgivePipeData* pOgdata = new OgivePipeData(BasePrimtiveData::PriMtiveType_OGIVE_PIPE);
-     pOgdata->length= 4;
-     pOgdata->innerRadius=1;
-     pOgdata->extRadius = 2;
-     pOgdata->arc = -1;
-     pOgdata->normal.set(-1,0,0);
-     pOgdata->pT2D = Texture2DManager::GetInstance()->GetT2DByID(Texture2DManager::T2DID_TEST);
-     osg::ref_ptr<osg::MatrixTransform> mtOg =ShapeNodeGenerator::GetInstance()->GetRoatationOfAxes(pOgdata);
-     m_pRoot->addChild(mtOg);
-     delete pOgdata;
-
+     eggData data;
+     data.length= 4;
+     data.innerRadiusLeft = 0;
+     data.innerRadiusRight = 1;
+     data.arcInner = osg::PI_2;
+     data.extRadiusLeft = 0;
+     data.extRadiusRight = 2;
+     data.arcExt = osg::PI_2;
+     data.normal = {-1,0,0};
+     data.textureID = Texture2DManager::T2DID_TEST;
+     data.color = {1,1,1,1};
+     Ogive ogive = {data};
+     m_pRoot->addChild(ogive.GetMt());
  }
