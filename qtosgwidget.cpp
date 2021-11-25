@@ -206,20 +206,3 @@ void QtOSGWidget::AddData(eggData data)
      Ogive ogive = {data};
      m_pRoot->addChild(ogive.GetMt());
  }
-
- void QtOSGWidget::TestFuc()
- {
-     eggData data;
-     data.length= 4;
-     data.innerRadiusLeft = 0;
-     data.innerRadiusRight = 1;
-     data.arcInner = osg::PI_2;
-     data.extRadiusLeft = 0;
-     data.extRadiusRight = 2;
-     data.arcExt = osg::PI_2;
-     data.normal = {-1,0,0};
-     data.textureID = Texture2DManager::T2DID_TEST;
-     data.color = {1,1,1,1};
-     Ogive ogive = {data};
-     m_pRoot->addChild(ogive.GetMt());
- }

@@ -46,7 +46,6 @@ public:
     void SetData(QVector<struct eggData> data);
     /** 添加场景物体标准数据 **/
     void AddData(eggData data);
-    void TestFuc();
 protected:
     virtual void initializeGL() override;
     virtual void resizeGL(int w, int h) override;

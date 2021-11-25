@@ -33,10 +33,6 @@ public:
     osg::ref_ptr<osg::Vec3Array> GetInnerArcArray() const;
     osg::ref_ptr<osg::MatrixTransform> GetMt();
 private:
-    float m_extArcFrom;
-    float m_extArcTo;
-    float m_innerArFrom;
-    float m_innerArTo;
     ulong m_arcPoints;
     ulong m_circlePoints;
     /** 外圆弧半径 **/
@@ -56,6 +52,7 @@ private:
     void Update();
     osg::Vec3 ComputeCircleCenter(const osg::Vec3&,const osg::Vec3&,const float&) const;
     osg::ref_ptr<osg::Vec3Array> GenerateCirclePoints(const osg::Vec3 &center,const float &radius,const int &points,const float &arcFrom ,const float &arcTo);
+    osg::ref_ptr<osg::Vec3Array> GenerateCirclePoints(const osg::Vec3 &center,const osg::Vec3 &from,const osg::Vec3 &to,const int &points);
     ulong ComputePointsByRadius(float r,float arc);
     void SetData(const eggData&);
 };
