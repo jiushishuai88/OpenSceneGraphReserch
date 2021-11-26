@@ -26,11 +26,17 @@ class Ogive
 public:
     Ogive();
     Ogive(eggData);
+    /** 获取初始法向量 **/
     osg::Vec3 GetBaseNormal()const;
+    /** 参数data **/
     eggData GetEggData() const;
+    /** 轴旋转体圆形粒度**/
     ulong GetCirclePoints() const;
+    /** 外轮廓线 **/
     osg::ref_ptr<osg::Vec3Array> GetExtArcArray() const;
+    /** 内轮廓线**/
     osg::ref_ptr<osg::Vec3Array> GetInnerArcArray() const;
+    /** 生成的三维模型**/
     osg::ref_ptr<osg::MatrixTransform> GetMt();
 private:
     ulong m_arcPoints;
@@ -40,10 +46,10 @@ private:
     /** 内圆弧半径 **/
     float m_innerArcR;
     const osg::Vec3 m_baseNormal;
-    osg::Vec3 m_extPointLeft;
-    osg::Vec3 m_extPointRight;
-    osg::Vec3 m_innerPointLeft;
-    osg::Vec3 m_innerPointRight;
+    osg::Vec3 m_extPointUp;
+    osg::Vec3 m_extPointDown;
+    osg::Vec3 m_innerPointUp;
+    osg::Vec3 m_innerPointDown;
     osg::Vec3 m_extCenter;
     osg::Vec3 m_innerCenter;
     osg::ref_ptr<osg::Vec3Array> m_pExtArray;

@@ -27,7 +27,7 @@
 #include <osg/CopyOp>
 #include "ogive.h"
 
- ShapeNodeGenerator* ShapeNodeGenerator::m_pSelf =nullptr;
+ShapeNodeGenerator* ShapeNodeGenerator::m_pSelf =nullptr;
 
 ShapeNodeGenerator::ShapeNodeGenerator()
 {
@@ -273,7 +273,7 @@ osg::ref_ptr<osg::Geometry> ShapeNodeGenerator::GenerateOgive(Ogive* pData)
 
    int numElements = arcCombineArray->getNumElements();
    ulong circlePoints = pData->GetCirclePoints();
-
+   //生成顶点序列号
    int* indexArray = new int[numElements*circlePoints];
    for(int i = 0;i<numElements*circlePoints;++i)
    {
@@ -281,6 +281,7 @@ osg::ref_ptr<osg::Geometry> ShapeNodeGenerator::GenerateOgive(Ogive* pData)
    }
    osg::ref_ptr<osg::Vec3Array> v= new osg::Vec3Array;
    osg::ref_ptr<osg::Vec2Array> texcoords= new osg::Vec2Array;
+   //通过外轮廓生成三维顶点
    for(int i =0;i<numElements;++i)
    {
        osg::Vec3f v3=(*arcCombineArray)[i];
@@ -289,7 +290,7 @@ osg::ref_ptr<osg::Geometry> ShapeNodeGenerator::GenerateOgive(Ogive* pData)
        LoopPoints(v3Points);
        v->insert(v->end(),v3Points->begin(),v3Points->end());
    }
-   //纹理贴图只贴表面
+   //计算纹理UV值，纹理贴图只贴表面
    int extNumElements = pExtArray->getNumElements();
      for(uint i =0;i<numElements;++i)
      {

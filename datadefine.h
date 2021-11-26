@@ -30,7 +30,7 @@
 #include <osg/Texture2D>
 #include "texture2dmanager.h"
 
-
+/** 原始传入数据**/
 struct eggUnit{
     float x1, y1; //center and left pofloat
     QString shape;//the shape of the unit, 1 cylinder, 2 cone, 3 oval, 4 antioval, 5 ball
@@ -62,6 +62,7 @@ struct eggUnit{
     bool useTest2d;
 };
 
+/** 接口使用数据 **/
 struct eggData
 {
     float length = {1};

@@ -36,7 +36,7 @@ private:
      /** 将数组点首尾相连 **/
      void LoopPoints( osg::ref_ptr<osg::Vec3Array>);
      osg::ref_ptr<osg::Geometry> GenerateOgive(Ogive* data);
-     /** 根据顶点和脚标构建几何图形 **/
+     /** 根据顶点和脚标构建几何图形表面 **/
      void GenerateSurface(osg::Geometry* geom,int* index1,int* index2,int col);
 
 public:

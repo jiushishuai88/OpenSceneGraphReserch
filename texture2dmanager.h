@@ -28,6 +28,7 @@ public:
     };
 public:
     static Texture2DManager* GetInstance();
+    /** 根据纹理ID获取纹理贴图 **/
     osg::ref_ptr<osg::Texture2D> GetT2DByID(T2DID);
 private:
     Texture2DManager();
