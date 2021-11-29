@@ -58,16 +58,16 @@ osg::ref_ptr<osg::MatrixTransform> Ogive::GetMt()
 
 void Ogive::Update()
 {
-    m_extPointLeft = {m_eggData.extRadiusLeft/2,0,m_eggData.length/2};
-    m_extPointRight = {m_eggData.extRadiusRight/2,0,-m_eggData.length/2};
-    m_innerPointLeft = {m_eggData.innerRadiusLeft/2,0,m_eggData.length/2};
-    m_innerPointRight = {m_eggData.innerRadiusRight/2,0,-m_eggData.length/2};
-    m_extCenter = ComputeCircleCenter(m_extPointLeft,m_extPointRight,m_eggData.arcExt);
-    m_innerCenter = ComputeCircleCenter(m_innerPointLeft,m_innerPointRight,m_eggData.arcInner);
-    osg::Vec3 vExtRightToCenter =  m_extPointRight-m_extCenter;
+    m_extPointUp = {m_eggData.extRadiusLeft/2,0,m_eggData.length/2};
+    m_extPointDown = {m_eggData.extRadiusRight/2,0,-m_eggData.length/2};
+    m_innerPointUp = {m_eggData.innerRadiusLeft/2,0,m_eggData.length/2};
+    m_innerPointDown = {m_eggData.innerRadiusRight/2,0,-m_eggData.length/2};
+    m_extCenter = ComputeCircleCenter(m_extPointUp,m_extPointDown,m_eggData.arcExt);
+    m_innerCenter = ComputeCircleCenter(m_innerPointUp,m_innerPointDown,m_eggData.arcInner);
+    osg::Vec3 vExtRightToCenter =  m_extPointDown-m_extCenter;
     m_extArcR = vExtRightToCenter.length();
 
-    osg::Vec3 vInnerRightToCenter = m_innerPointRight-m_innerCenter;
+    osg::Vec3 vInnerRightToCenter = m_innerPointDown-m_innerCenter;
     m_innerArcR = vInnerRightToCenter.length();
     float maxArc= (abs(m_eggData.arcExt)>abs(m_eggData.arcInner))?m_eggData.arcExt:m_eggData.arcInner;
 
@@ -75,23 +75,23 @@ void Ogive::Update()
     m_circlePoints = ComputePointsByRadius(m_extArcR-abs(vExtRightToCenter.x()),osg::PI*2);
     if(abs(m_eggData.arcExt)>0.01)
     {
-       m_pExtArray = GenerateCirclePoints(m_extCenter,m_extPointLeft,m_extPointRight,m_arcPoints);
+       m_pExtArray = GenerateCirclePoints(m_extCenter,m_extPointUp,m_extPointDown,m_arcPoints);
     }
     else
     {
         m_pExtArray->clear();
-        m_pExtArray->push_back(m_extPointLeft);
-        m_pExtArray->push_back(m_extPointRight);
+        m_pExtArray->push_back(m_extPointUp);
+        m_pExtArray->push_back(m_extPointDown);
     }
     if(abs(m_eggData.arcInner)>0.01)
     {
-       m_pInnerArray = GenerateCirclePoints(m_innerCenter,m_innerPointRight,m_innerPointLeft,m_arcPoints);
+       m_pInnerArray = GenerateCirclePoints(m_innerCenter,m_innerPointDown,m_innerPointUp,m_arcPoints);
     }
     else
     {
         m_pInnerArray->clear();
-        m_pInnerArray->push_back(m_innerPointRight);
-        m_pInnerArray->push_back(m_innerPointLeft);
+        m_pInnerArray->push_back(m_innerPointDown);
+        m_pInnerArray->push_back(m_innerPointUp);
     }
 }
 

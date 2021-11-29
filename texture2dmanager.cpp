@@ -30,3 +30,8 @@ Texture2DManager::Texture2DManager()
      }
      return nullptr;
  }
+
+  void Texture2DManager::Init()
+  {
+
+  }

@@ -3,6 +3,7 @@
 #include <QApplication>
 #include "qtosgwidget.h"
 #include <QDebug>
+#include "globalmanager.h"
 extern "C"
 {
 #include "wealib.h"
@@ -14,6 +15,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow w;
     QtOSGWidget* osgWD = new QtOSGWidget(&w);
+    GlobalManager::GetInstance()->Init();
     //----------------------------------------------------------------------------------------------
     eggData data;
     data.length= 4;
