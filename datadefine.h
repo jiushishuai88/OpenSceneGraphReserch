@@ -65,17 +65,28 @@ struct eggUnit{
 /** 接口使用数据 **/
 struct eggData
 {
+    //长度
     float length = {1};
+    //内径（左）
     float innerRadiusLeft = {1};
+    //内径（右）
     float innerRadiusRight = {1};
+    //弧度值
     float arcInner = 0.01;
 
+    //外径 左
     float extRadiusLeft = {0.5};
+    //外径 右
     float extRadiusRight = {0.5};
+    //弧度值
     float arcExt = 0.01;
+    //中心坐标
     osg::Vec3 center = {0,0,0};
+    //朝向
     osg::Vec3 normal = {0,0,1};
+    //颜色
     osg::Vec4 color = {1,1,1,1};
+    //纹理id
     Texture2DManager::T2DID textureID = Texture2DManager::T2DID_NONE;
 };
 

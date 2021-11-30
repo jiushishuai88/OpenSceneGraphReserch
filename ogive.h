@@ -38,6 +38,8 @@ public:
     osg::ref_ptr<osg::Vec3Array> GetInnerArcArray() const;
     /** 获取三维几何**/
     osg::ref_ptr<osg::Geometry> GetGeometry();
+    /** 设置原始数据 **/
+    void SetData(const eggData&);
 private:
     ulong m_arcPoints;
     ulong m_circlePoints;
@@ -57,15 +59,23 @@ private:
     osg::ref_ptr<osg::Geometry> m_pGeom;
     eggData m_eggData;
     void Update();
+    /** 根据两点和弧度计算圆心（逆时针方向）**/
     osg::Vec3 ComputeCircleCenter(const osg::Vec3&,const osg::Vec3&,const float&) const;
+    /** 生成弧线 **/
     osg::ref_ptr<osg::Vec3Array> GenerateArcPoints(const osg::Vec3 &center,const float &radius,const int &points,const float &arcFrom ,const float &arcTo);
+    /** 生成弧线 **/
     osg::ref_ptr<osg::Vec3Array> GenerateArcPoints(const osg::Vec3 &center,const osg::Vec3 &from,const osg::Vec3 &to,const int &points);
+    /** 计算粒度 **/
     ulong ComputePointsByRadius(float r,float arc);
-    void SetData(const eggData&);
+    /** 连接成面 **/
     void GenerateSurface(osg::Geometry* geom,int* index1,int* index2,int col);
+    /** 首尾连接成环形数据 **/
     void LoopPoints( osg::ref_ptr<osg::Vec3Array> pArr);
+     /** 几何变换 **/
     void V3ArrayTransform(osg::Vec3Array* pArr,const osg::Matrixd& mat);
+    /** 生成圆形 **/
     osg::ref_ptr<osg::Vec3Array> GenerateCircle(float radius,int points);
+    /** 生成几何体 **/
     void GenerateGeom();
 };
 
