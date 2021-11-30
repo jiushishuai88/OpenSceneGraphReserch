@@ -1,10 +1,13 @@
 #include "ogive.h"
 #include "shapenodegenerator.h"
+#include <osg/Drawable>
+#include <osg/Geometry>
 
 Ogive::Ogive():
     m_baseNormal(0,0,1),
     m_pExtArray(new osg::Vec3Array),
-    m_pInnerArray(new osg::Vec3Array)
+    m_pInnerArray(new osg::Vec3Array),
+    m_pGeom(new osg::Geometry)
 {
 
 }
@@ -13,7 +16,9 @@ Ogive::Ogive(eggData data):
     m_baseNormal(0,0,1),
     m_pExtArray(new osg::Vec3Array),
     m_pInnerArray(new osg::Vec3Array),
+    m_pGeom(new osg::Geometry),
     m_eggData(data)
+
 {
     Update();
 }
@@ -50,11 +55,6 @@ osg::Vec3 Ogive::ComputeCircleCenter(const osg::Vec3& p0,const osg::Vec3& p1,con
     return Center;
 }
 
-osg::ref_ptr<osg::MatrixTransform> Ogive::GetMt()
-{
-    osg::ref_ptr<osg::MatrixTransform> mt = ShapeNodeGenerator::GetInstance()->GetRoatationOfAxes(this);
-    return mt;
-}
 
 void Ogive::Update()
 {
@@ -75,7 +75,7 @@ void Ogive::Update()
     m_circlePoints = ComputePointsByRadius(m_extArcR-abs(vExtRightToCenter.x()),osg::PI*2);
     if(abs(m_eggData.arcExt)>0.01)
     {
-       m_pExtArray = GenerateCirclePoints(m_extCenter,m_extPointUp,m_extPointDown,m_arcPoints);
+       m_pExtArray = GenerateArcPoints(m_extCenter,m_extPointUp,m_extPointDown,m_arcPoints);
     }
     else
     {
@@ -85,7 +85,7 @@ void Ogive::Update()
     }
     if(abs(m_eggData.arcInner)>0.01)
     {
-       m_pInnerArray = GenerateCirclePoints(m_innerCenter,m_innerPointDown,m_innerPointUp,m_arcPoints);
+       m_pInnerArray = GenerateArcPoints(m_innerCenter,m_innerPointDown,m_innerPointUp,m_arcPoints);
     }
     else
     {
@@ -93,9 +93,10 @@ void Ogive::Update()
         m_pInnerArray->push_back(m_innerPointDown);
         m_pInnerArray->push_back(m_innerPointUp);
     }
+    GenerateGeom();
 }
 
-osg::ref_ptr<osg::Vec3Array> Ogive::GenerateCirclePoints(const osg::Vec3 &center,const float &radius,const int &points,const float &arcFrom ,const float &arcTo)
+osg::ref_ptr<osg::Vec3Array> Ogive::GenerateArcPoints(const osg::Vec3 &center,const float &radius,const int &points,const float &arcFrom ,const float &arcTo)
 {
 
   float angle = (arcTo-arcFrom)/points;
@@ -107,7 +108,7 @@ osg::ref_ptr<osg::Vec3Array> Ogive::GenerateCirclePoints(const osg::Vec3 &center
   return v;
 }
 
-osg::ref_ptr<osg::Vec3Array> Ogive::GenerateCirclePoints(const osg::Vec3 &center,const osg::Vec3 &pointFrom,const osg::Vec3 &pointTo,const int &points)
+osg::ref_ptr<osg::Vec3Array> Ogive::GenerateArcPoints(const osg::Vec3 &center,const osg::Vec3 &pointFrom,const osg::Vec3 &pointTo,const int &points)
 {
      osg::Vec3 vFrom =pointFrom-center;
      osg::Vec3 vTo =pointTo-center;
@@ -152,3 +153,91 @@ osg::ref_ptr<osg::Vec3Array> Ogive::GetInnerArcArray() const
      Update();
  }
 
+ osg::ref_ptr<osg::Geometry> Ogive::GetGeometry()
+ {
+    return m_pGeom;
+ }
+
+ void Ogive::GenerateSurface(osg::Geometry* geom,int* index1,int* index2,int col)
+ {
+     int lineNum = 2;//默认为2条线形成面
+     osg::ref_ptr<osg::DrawElementsUInt> indices =new osg::DrawElementsUInt(GL_TRIANGLE_STRIP, col*lineNum);
+     for(int i=0;i<col;++i)
+     {
+          (*indices)[i*lineNum] =index1[i];
+          (*indices)[i*lineNum+1] = index2[i];
+     }
+
+     geom->addPrimitiveSet( indices.get() );
+ }
+
+ void Ogive::LoopPoints( osg::ref_ptr<osg::Vec3Array> pArr)
+  {
+     pArr->push_back(pArr->front());
+  }
+
+ void Ogive::V3ArrayTransform(osg::Vec3Array* pArr,const osg::Matrixd& mat)
+ {
+     for(uint i= 0;i < pArr->getNumElements();++i)
+     {
+         (*pArr)[i] = mat.preMult((*pArr)[i]);
+     }
+ }
+
+ osg::ref_ptr<osg::Vec3Array> Ogive::GenerateCircle(float radius,int points)
+ {
+   float angle = (osg::PI*2)/points;
+   osg::ref_ptr<osg::Vec3Array> v = new osg::Vec3Array();
+   for(int i = 0;i<points;++i)
+   {
+       osg::Vec3 v3(radius*cosf(i*angle),radius*sinf(i*angle),0);
+       v->push_back(osg::Vec3(radius*cosf(i*angle),radius*sinf(i*angle),0));
+   }
+   return v;
+ }
+
+ void Ogive::GenerateGeom()
+ {
+     osg::ref_ptr<osg::Vec3Array> arcCombineArray = new osg::Vec3Array();
+     osg::ref_ptr<osg::Vec3Array> pExtArray = GetExtArcArray();
+     arcCombineArray->insert(arcCombineArray->end(),pExtArray->begin(),pExtArray->end());
+     osg::ref_ptr<osg::Vec3Array> pInnerArray = GetInnerArcArray();
+     arcCombineArray->insert(arcCombineArray->end(),pInnerArray->begin(),pInnerArray->end());
+
+     int numElements = arcCombineArray->getNumElements();
+     //生成顶点序列号
+     int* indexArray = new int[numElements*m_circlePoints];
+     for(int i = 0;i<numElements*m_circlePoints;++i)
+     {
+        indexArray[i]=i;
+     }
+     osg::ref_ptr<osg::Vec3Array> v= new osg::Vec3Array;
+     osg::ref_ptr<osg::Vec2Array> texcoords= new osg::Vec2Array;
+     //通过外轮廓生成三维顶点
+     for(int i =0;i<numElements;++i)
+     {
+         osg::Vec3f v3=(*arcCombineArray)[i];
+         osg::ref_ptr<osg::Vec3Array> v3Points= GenerateCircle(v3.x(),m_circlePoints-1);
+         V3ArrayTransform(v3Points,osg::Matrix::translate(osg::Vec3(0,0,v3.z())));
+         LoopPoints(v3Points);
+         v->insert(v->end(),v3Points->begin(),v3Points->end());
+     }
+     //计算纹理UV值，纹理贴图只贴表面
+     int extNumElements = pExtArray->getNumElements();
+       for(uint i =0;i<numElements;++i)
+       {
+           for(uint j=0;j<m_circlePoints;++j)
+           {
+               texcoords->push_back(osg::Vec2f(float(j)/float((m_circlePoints-1)),float(extNumElements-1-i)/float((extNumElements-1))));
+           }
+       }
+
+     m_pGeom->setVertexArray(v.get());
+     //arg0:the index of text2d
+     m_pGeom->setTexCoordArray(0,texcoords);
+     for(int i= 0;i<numElements;++i)
+     {
+          GenerateSurface(m_pGeom,indexArray+i*m_circlePoints,indexArray+((i+1)%numElements)*m_circlePoints,m_circlePoints);
+     }
+     delete []indexArray;
+ }

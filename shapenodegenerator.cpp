@@ -250,68 +250,6 @@ osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetCircleGrid(const osg::
        return mt;
    }
 
-   void ShapeNodeGenerator::GenerateSurface(osg::Geometry* geom,int* index1,int* index2,int col)
-   {
-       int lineNum = 2;//默认为2条线形成面
-       osg::ref_ptr<osg::DrawElementsUInt> indices =new osg::DrawElementsUInt(GL_TRIANGLE_STRIP, col*lineNum);
-       for(int i=0;i<col;++i)
-       {
-            (*indices)[i*lineNum] =index1[i];
-            (*indices)[i*lineNum+1] = index2[i];
-       }
-
-       geom->addPrimitiveSet( indices.get() );
-   }
-
-osg::ref_ptr<osg::Geometry> ShapeNodeGenerator::GenerateOgive(Ogive* pData)
-{
-   osg::ref_ptr<osg::Vec3Array> arcCombineArray = new osg::Vec3Array();
-   osg::ref_ptr<osg::Vec3Array> pExtArray = pData->GetExtArcArray();
-   arcCombineArray->insert(arcCombineArray->end(),pExtArray->begin(),pExtArray->end());
-   osg::ref_ptr<osg::Vec3Array> pInnerArray = pData->GetInnerArcArray();
-   arcCombineArray->insert(arcCombineArray->end(),pInnerArray->begin(),pInnerArray->end());
-
-   int numElements = arcCombineArray->getNumElements();
-   ulong circlePoints = pData->GetCirclePoints();
-   //生成顶点序列号
-   int* indexArray = new int[numElements*circlePoints];
-   for(int i = 0;i<numElements*circlePoints;++i)
-   {
-      indexArray[i]=i;
-   }
-   osg::ref_ptr<osg::Vec3Array> v= new osg::Vec3Array;
-   osg::ref_ptr<osg::Vec2Array> texcoords= new osg::Vec2Array;
-   //通过外轮廓生成三维顶点
-   for(int i =0;i<numElements;++i)
-   {
-       osg::Vec3f v3=(*arcCombineArray)[i];
-       osg::ref_ptr<osg::Vec3Array> v3Points= GenerateCirclePoints(v3.x(),circlePoints-1);
-       V3ArrayTransform(v3Points,osg::Matrix::translate(osg::Vec3(0,0,v3.z())));
-       LoopPoints(v3Points);
-       v->insert(v->end(),v3Points->begin(),v3Points->end());
-   }
-   //计算纹理UV值，纹理贴图只贴表面
-   int extNumElements = pExtArray->getNumElements();
-     for(uint i =0;i<numElements;++i)
-     {
-         for(uint j=0;j<circlePoints;++j)
-         {
-             texcoords->push_back(osg::Vec2f(float(j)/float((circlePoints-1)),float(extNumElements-1-i)/float((extNumElements-1))));
-         }
-     }
-
-   osg::ref_ptr<osg::Geometry> geom = new osg::Geometry();
-   geom->setVertexArray(v.get());
-   //arg0:the index of text2d
-   geom->setTexCoordArray(0,texcoords);
-   for(int i= 0;i<numElements;++i)
-   {
-        GenerateSurface(geom,indexArray+i*circlePoints,indexArray+((i+1)%numElements)*circlePoints,circlePoints);
-   }
-   delete []indexArray;
-   return geom;
-}
-
 osg::ref_ptr<osg::Vec3Array> ShapeNodeGenerator::GenerateCirclePoints(float radius,int points,float arcFrom ,float arc)
 {
   float angle = arc/points;
@@ -323,11 +261,6 @@ osg::ref_ptr<osg::Vec3Array> ShapeNodeGenerator::GenerateCirclePoints(float radi
   }
   return v;
 }
-
-void ShapeNodeGenerator::LoopPoints( osg::ref_ptr<osg::Vec3Array> pArr)
- {
-    pArr->push_back(pArr->front());
- }
 
 
  ulong ShapeNodeGenerator::ComputePointsByRadius(float r,float arc)
@@ -343,25 +276,26 @@ void ShapeNodeGenerator::LoopPoints( osg::ref_ptr<osg::Vec3Array> pArr)
      }
  }
 
- osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetRoatationOfAxes(Ogive* pData)
+ osg::ref_ptr<osg::MatrixTransform> ShapeNodeGenerator::GetRoatationOfAxes(const eggData* pData)
  {
-     osg::ref_ptr<osg::Geometry> geom = GenerateOgive(pData);
+     Ogive ogive(*pData);
+     osg::ref_ptr<osg::Geometry> geom = ogive.GetGeometry();
      osgUtil::SmoothingVisitor::smooth( *geom );
 
      osg::ref_ptr<osg::Vec4Array> colorArray=new osg::Vec4Array();
-     colorArray->push_back(pData->GetEggData().color);
+     colorArray->push_back(pData->color);
      geom->setColorArray(colorArray.get());
      geom->setColorBinding(osg::Geometry::BIND_OVERALL);
      osg::ref_ptr<osg::Geode> geode = new osg::Geode();
      geode->addDrawable(geom.get());
      osg::StateSet* stateset = geode->getOrCreateStateSet();
-     osg::ref_ptr<osg::Texture2D> texture =Texture2DManager::GetInstance()->GetT2DByID(pData->GetEggData().textureID);
+     osg::ref_ptr<osg::Texture2D> texture =Texture2DManager::GetInstance()->GetT2DByID(pData->textureID);
      if(texture!=nullptr)
      {
          stateset->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
      }
      osg::ref_ptr<osg::MatrixTransform> mt = new osg::MatrixTransform();
-     mt->setMatrix(osg::Matrix::rotate(pData->GetBaseNormal(),pData->GetEggData().normal)*osg::Matrix::translate(pData->GetEggData().center));
+     mt->setMatrix(osg::Matrix::rotate(ogive.GetBaseNormal(),pData->normal)*osg::Matrix::translate(pData->center));
      mt->addChild(geode);
      return mt;
  }

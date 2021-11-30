@@ -36,8 +36,8 @@ public:
     osg::ref_ptr<osg::Vec3Array> GetExtArcArray() const;
     /** 内轮廓线**/
     osg::ref_ptr<osg::Vec3Array> GetInnerArcArray() const;
-    /** 生成的三维模型**/
-    osg::ref_ptr<osg::MatrixTransform> GetMt();
+    /** 获取三维几何**/
+    osg::ref_ptr<osg::Geometry> GetGeometry();
 private:
     ulong m_arcPoints;
     ulong m_circlePoints;
@@ -54,13 +54,19 @@ private:
     osg::Vec3 m_innerCenter;
     osg::ref_ptr<osg::Vec3Array> m_pExtArray;
     osg::ref_ptr<osg::Vec3Array> m_pInnerArray;
+    osg::ref_ptr<osg::Geometry> m_pGeom;
     eggData m_eggData;
     void Update();
     osg::Vec3 ComputeCircleCenter(const osg::Vec3&,const osg::Vec3&,const float&) const;
-    osg::ref_ptr<osg::Vec3Array> GenerateCirclePoints(const osg::Vec3 &center,const float &radius,const int &points,const float &arcFrom ,const float &arcTo);
-    osg::ref_ptr<osg::Vec3Array> GenerateCirclePoints(const osg::Vec3 &center,const osg::Vec3 &from,const osg::Vec3 &to,const int &points);
+    osg::ref_ptr<osg::Vec3Array> GenerateArcPoints(const osg::Vec3 &center,const float &radius,const int &points,const float &arcFrom ,const float &arcTo);
+    osg::ref_ptr<osg::Vec3Array> GenerateArcPoints(const osg::Vec3 &center,const osg::Vec3 &from,const osg::Vec3 &to,const int &points);
     ulong ComputePointsByRadius(float r,float arc);
     void SetData(const eggData&);
+    void GenerateSurface(osg::Geometry* geom,int* index1,int* index2,int col);
+    void LoopPoints( osg::ref_ptr<osg::Vec3Array> pArr);
+    void V3ArrayTransform(osg::Vec3Array* pArr,const osg::Matrixd& mat);
+    osg::ref_ptr<osg::Vec3Array> GenerateCircle(float radius,int points);
+    void GenerateGeom();
 };
 
 #endif // OGIVE_H

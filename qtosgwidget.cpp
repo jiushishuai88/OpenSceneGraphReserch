@@ -191,18 +191,17 @@ void QtOSGWidget::SetData(QVector<struct eggData> data)
     m_veggUnit = data;
     for(int i=0;i<m_veggUnit.size();++i)
     {
-        Draw(m_veggUnit.at(i));
+        Draw(&m_veggUnit.at(i));
     }
 }
 
 void QtOSGWidget::AddData(eggData data)
 {
     m_veggUnit.append(data);
-    Draw(data);
+    Draw(&data);
 }
 
- void QtOSGWidget::Draw(const eggData &data)
+ void QtOSGWidget::Draw(const eggData *data)
  {
-     Ogive ogive = {data};
-     m_pRoot->addChild(ogive.GetMt());
+     m_pRoot->addChild(ShapeNodeGenerator::GetInstance()->GetRoatationOfAxes(data));
  }

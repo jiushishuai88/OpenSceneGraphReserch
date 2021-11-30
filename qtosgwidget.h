@@ -59,7 +59,7 @@ private:
     void SetCamera();
     void SetManipulator();
     void SetViewer();
-    void Draw(const eggData& data);
+    void Draw(const eggData* data);
     osg::ref_ptr<osgViewer::GraphicsWindow> m_pGraphicsWindow;
     osg::ref_ptr<osgViewer::Viewer> m_pViewer;
     qreal m_scale;
